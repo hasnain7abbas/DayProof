@@ -2,7 +2,11 @@
 
 **Prove your day before it disappears.**
 
-DayProof is a calm Android productivity app for choosing the few tasks that matter in the morning and reviewing them honestly at night. It is local-first, private by default, and built around a simple daily ritual: make a small promise, then close the loop.
+DayProof is a small Android app for the two moments where a day usually goes honest or vague: the morning plan and the night review.
+
+In the morning, you write down the few things that would actually make the day count. At night, you come back and mark what happened. Done stays done. Not done carries into tomorrow. Anything that no longer matters can be removed without pretending it was completed.
+
+The point is not to manage every little task. It is to keep a quiet record of whether the important things survived the day.
 
 ## Screenshots
 
@@ -14,28 +18,41 @@ DayProof is a calm Android productivity app for choosing the few tasks that matt
 | --- | --- |
 | ![Stats screen](docs/images/dayproof-stats.png) | ![Settings screen](docs/images/dayproof-settings.png) |
 
-## What It Does
+## Why It Exists
 
-- Morning onboarding with reminder time and night review time.
-- A focused planning flow with a recommended 3 to 5 task rhythm and a hard 7 task limit.
-- Carry-over tasks for work that was marked not done the night before.
-- A three-day carry warning that nudges the user to break a recurring task smaller.
-- Night review with Done, Not Done, and Remove outcomes.
-- Local history, weekly stats, streaks, completion rates, and most-carried task insight.
-- Settings for notifications, strong reminder mode, max tasks, JSON export, onboarding reset, and clearing data.
-- Hidden developer test mode unlocked by tapping the app version seven times.
+Most to-do apps make it easy to keep adding things. DayProof tries to do the opposite. It asks for a short list, locks the day, and then brings the same list back at night.
 
-## Tech Stack
+If something keeps coming back for three days, the app points it out. Maybe it needs to be broken smaller. Maybe it should be removed. Either way, it should not quietly haunt the list forever.
 
-- Flutter 3.44.2
-- Hive and Hive Flutter for local storage
-- flutter_local_notifications with timezone scheduling
-- permission_handler for Android notification permission
-- google_fonts, flutter_animate, and confetti for the polished ritual feel
+## What Is Built
 
-There is no backend, login, Firebase, cloud sync, ads, or social layer.
+- First-run onboarding for morning and night reminder times.
+- Morning planning with editable tasks before the day is locked.
+- Carry-over tasks from the previous night.
+- Emergency tasks after locking, marked as added later.
+- Night review with Done, Not Done, and Remove.
+- Automatic carry-over for tasks marked Not Done.
+- History for previous days.
+- Simple stats for completion, streaks, completed tasks, carried tasks, and most-carried task.
+- Settings for reminder times, notifications, strong reminder mode, max tasks, JSON export, reset onboarding, and clearing data.
+- Hidden developer test mode by tapping the app version seven times.
 
-## Run Locally
+## Privacy
+
+DayProof is local-first. There is no account, backend, Firebase project, cloud sync, ads, or social layer. The data lives on the device through Hive local storage.
+
+## Tech
+
+- Flutter
+- Hive
+- flutter_local_notifications
+- timezone
+- permission_handler
+- google_fonts
+- flutter_animate
+- confetti
+
+## Run It
 
 ```powershell
 flutter pub get
@@ -52,53 +69,51 @@ flutter test
 flutter build apk --release
 ```
 
-Flutter writes the release APK here:
+Release APK from Flutter:
 
 ```text
 build/app/outputs/flutter-apk/app-release.apk
 ```
 
-This repo also keeps a copied release artifact here:
+Copied release artifact in this repo:
 
 ```text
 release/dayproof-release.apk
 ```
 
-## Android Reminder Notes
+Debug APK artifact:
 
-DayProof uses scheduled local notifications. Android does not allow apps to force-open themselves in the background, so reminders open the right screen when the user taps the notification.
+```text
+release/dayproof-debug.apk
+```
 
-On Android 13 and newer, notification permission is requested. If permission is denied, DayProof still works manually and shows a non-blocking reminder-off message.
+## Reminder Behavior
 
-Strong reminder mode can request exact alarm permission. The app explains it in plain language:
+DayProof uses normal Android notifications. It does not try to force-open itself in the background. The morning reminder opens planning when tapped, and the night reminder opens review when tapped.
+
+On Android 13 and newer, notification permission is requested. If the user says no, the app still works manually.
+
+Strong reminder mode can request exact alarm permission. The app explains it like this:
 
 > DayProof needs reminder permission so it can remind you exactly when you choose. Without it, reminders may arrive a little late depending on your phone settings.
 
-If exact alarm permission is unavailable or declined, the app falls back to normal scheduled reminders instead of crashing.
+If that permission is unavailable or denied, DayProof falls back to normal scheduled reminders.
 
-## Folder Structure
+## Project Shape
 
 ```text
 lib/
   app.dart
   main.dart
   core/
-    theme/
-    utils/
   data/
-    models/
-    storage/
   services/
   features/
-    onboarding/
-    today/
-    stats/
-    history/
-    settings/
   shared/
-    widgets/
 ```
+
+The feature folders are split around the actual screens: onboarding, today, stats, history, and settings.
 
 ## License
 
-Private project unless a license is added later.
+Private project for now.
