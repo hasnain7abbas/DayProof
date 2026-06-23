@@ -99,7 +99,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Today’s proof',
+                      "Today's proof",
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
@@ -136,7 +136,7 @@ class HomeScreen extends StatelessWidget {
                       'Morning reminder: ${formatTimeOfDay(controller.settings.morningTime)}',
                     ),
                     Text(
-                      'Tonight’s review: ${formatTimeOfDay(controller.settings.nightTime)}',
+                      "Tonight's review: ${formatTimeOfDay(controller.settings.nightTime)}",
                     ),
                   ],
                 ),

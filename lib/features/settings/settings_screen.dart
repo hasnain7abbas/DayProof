@@ -189,7 +189,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
             const SizedBox(height: 20),
             Text(
-              'Morning: ${formatTimeOfDay(s.morningTime)}  •  Night: ${formatTimeOfDay(s.nightTime)}',
+              'Morning: ${formatTimeOfDay(s.morningTime)}  -  Night: ${formatTimeOfDay(s.nightTime)}',
               textAlign: TextAlign.center,
             ),
           ],

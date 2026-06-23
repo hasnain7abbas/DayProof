@@ -52,7 +52,10 @@ class _DayProofAppState extends State<DayProofApp> {
             if (!controller.settings.onboardingCompleted) {
               return OnboardingScreen(controller: controller);
             }
-            return DayProofHome(controller: controller);
+            return NotificationRouteListener(
+              controller: controller,
+              child: DayProofHome(controller: controller),
+            );
           },
         ),
       ),
@@ -119,7 +122,13 @@ class DayProofController extends ChangeNotifier {
         notice = 'Reminders are off. You can still use DayProof manually.';
       }
       if (requestExactAlarm && settings.strongReminderMode) {
-        await notifications.requestExactAlarmPermission();
+        final exactAllowed = await notifications.requestExactAlarmPermission();
+        if (!exactAllowed) {
+          settings = settings.copyWith(strongReminderMode: false);
+          await storage.saveSettings(settings);
+          notice =
+              'Strong reminders are unavailable, so DayProof will use normal reminders.';
+        }
       }
     }
     await notifications.scheduleDaily(settings);
@@ -244,6 +253,66 @@ class DayProofHome extends StatelessWidget {
       ),
     );
   }
+}
+
+class NotificationRouteListener extends StatefulWidget {
+  const NotificationRouteListener({
+    super.key,
+    required this.controller,
+    required this.child,
+  });
+
+  final DayProofController controller;
+  final Widget child;
+
+  @override
+  State<NotificationRouteListener> createState() =>
+      _NotificationRouteListenerState();
+}
+
+class _NotificationRouteListenerState extends State<NotificationRouteListener> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.notifications.launchPayload.addListener(_openPayload);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openPayload());
+  }
+
+  @override
+  void didUpdateWidget(NotificationRouteListener oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller.notifications != widget.controller.notifications) {
+      oldWidget.controller.notifications.launchPayload.removeListener(
+        _openPayload,
+      );
+      widget.controller.notifications.launchPayload.addListener(_openPayload);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.notifications.launchPayload.removeListener(_openPayload);
+    super.dispose();
+  }
+
+  void _openPayload() {
+    if (!mounted) return;
+    final payload = widget.controller.notifications.consumeLaunchPayload();
+    if (payload == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      switch (payload) {
+        case 'morning':
+          DayProofRoutes.morning(context, widget.controller);
+        case 'night':
+          DayProofRoutes.night(context, widget.controller);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class DayProofRoutes {

@@ -9,19 +9,25 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
-  String? launchPayload;
+  final ValueNotifier<String?> launchPayload = ValueNotifier<String?>(null);
 
   Future<void> init() async {
     tz.initializeTimeZones();
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     final details = await _plugin.getNotificationAppLaunchDetails();
-    launchPayload = details?.notificationResponse?.payload;
+    launchPayload.value = details?.notificationResponse?.payload;
     await _plugin.initialize(
       settings: const InitializationSettings(android: android),
       onDidReceiveNotificationResponse: (response) {
-        launchPayload = response.payload;
+        launchPayload.value = response.payload;
       },
     );
+  }
+
+  String? consumeLaunchPayload() {
+    final payload = launchPayload.value;
+    launchPayload.value = null;
+    return payload;
   }
 
   Future<bool> requestNotificationPermission() async {
@@ -50,7 +56,7 @@ class NotificationService {
         ? AndroidScheduleMode.exactAllowWhileIdle
         : AndroidScheduleMode.inexactAllowWhileIdle;
 
-    await _schedule(
+    await _scheduleWithFallback(
       id: 1001,
       title: 'DayProof',
       body: 'Choose what matters today.',
@@ -58,7 +64,7 @@ class NotificationService {
       time: settings.morningTime,
       mode: mode,
     );
-    await _schedule(
+    await _scheduleWithFallback(
       id: 1002,
       title: 'DayProof Review',
       body: 'Did you do what you promised yourself?',
@@ -73,7 +79,7 @@ class NotificationService {
           24,
       minute: (settings.nightTime.minute + 30) % 60,
     );
-    await _schedule(
+    await _scheduleWithFallback(
       id: 1003,
       title: 'Still want to close the day?',
       body: 'No guilt. Just truth.',
@@ -81,6 +87,36 @@ class NotificationService {
       time: missed,
       mode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
+  }
+
+  Future<void> _scheduleWithFallback({
+    required int id,
+    required String title,
+    required String body,
+    required String payload,
+    required TimeOfDay time,
+    required AndroidScheduleMode mode,
+  }) async {
+    try {
+      await _schedule(
+        id: id,
+        title: title,
+        body: body,
+        payload: payload,
+        time: time,
+        mode: mode,
+      );
+    } catch (_) {
+      if (mode == AndroidScheduleMode.inexactAllowWhileIdle) rethrow;
+      await _schedule(
+        id: id,
+        title: title,
+        body: body,
+        payload: payload,
+        time: time,
+        mode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    }
   }
 
   Future<void> showNow({

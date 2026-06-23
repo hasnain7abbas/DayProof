@@ -73,7 +73,7 @@ class _MorningPlanningScreenState extends State<MorningPlanningScreen> {
                               child: Text(
                                 planned.length >= 5
                                     ? 'This app works better when the list is small. Add only what truly matters.'
-                                    : '${planned.length}/7 tasks',
+                                    : '${planned.length}/${c.settings.maxTasks} tasks',
                               ),
                             ),
                             PrimaryButton(
@@ -135,8 +135,8 @@ class _MorningPlanningScreenState extends State<MorningPlanningScreen> {
                   const SizedBox(height: 20),
                   PrimaryButton(
                     label: c.todayProof.morningLocked
-                        ? 'Today’s proof is locked'
-                        : 'Lock today’s proof',
+                        ? "Today's proof is locked"
+                        : "Lock today's proof",
                     icon: Icons.lock_rounded,
                     onPressed: c.todayProof.morningLocked
                         ? null

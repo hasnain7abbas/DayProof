@@ -9,6 +9,7 @@ class TaskModel {
     this.completedAt,
     this.reviewedAt,
     this.originalDate,
+    this.previousTaskId,
     this.addedLater = false,
   });
 
@@ -21,6 +22,7 @@ class TaskModel {
   final int carryCount;
   final DateTime assignedDate;
   final DateTime? originalDate;
+  final String? previousTaskId;
   final bool addedLater;
 
   TaskModel copyWith({
@@ -31,6 +33,7 @@ class TaskModel {
     int? carryCount,
     DateTime? assignedDate,
     DateTime? originalDate,
+    String? previousTaskId,
     bool? addedLater,
     bool clearCompletedAt = false,
     bool clearReviewedAt = false,
@@ -45,6 +48,7 @@ class TaskModel {
       carryCount: carryCount ?? this.carryCount,
       assignedDate: assignedDate ?? this.assignedDate,
       originalDate: originalDate ?? this.originalDate,
+      previousTaskId: previousTaskId ?? this.previousTaskId,
       addedLater: addedLater ?? this.addedLater,
     );
   }
@@ -59,6 +63,7 @@ class TaskModel {
     'carryCount': carryCount,
     'assignedDate': assignedDate.toIso8601String(),
     'originalDate': originalDate?.toIso8601String(),
+    'previousTaskId': previousTaskId,
     'addedLater': addedLater,
   };
 
@@ -79,6 +84,7 @@ class TaskModel {
       originalDate: map['originalDate'] == null
           ? null
           : DateTime.parse(map['originalDate'] as String),
+      previousTaskId: map['previousTaskId'] as String?,
       addedLater: map['addedLater'] == true,
     );
   }

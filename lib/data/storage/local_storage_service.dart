@@ -18,8 +18,12 @@ class LocalStorageService {
   late Box _settings;
   final _uuid = const Uuid();
 
-  Future<void> init() async {
-    await Hive.initFlutter();
+  Future<void> init({String? path}) async {
+    if (path == null) {
+      await Hive.initFlutter();
+    } else {
+      Hive.init(path);
+    }
     _tasks = await Hive.openBox(_tasksBoxName);
     _proofs = await Hive.openBox(_proofsBoxName);
     _settings = await Hive.openBox(_settingsBoxName);
@@ -70,11 +74,18 @@ class LocalStorageService {
 
   List<TaskModel> carryOversFor(DateTime date) {
     final target = dayKey(date);
-    return getAllTasks()
+    final all = getAllTasks();
+    final alreadyCarriedIds = all
+        .where((task) => dayKey(task.assignedDate) == target)
+        .map((task) => task.previousTaskId)
+        .whereType<String>()
+        .toSet();
+    return all
         .where(
           (task) =>
               task.status == 'failed' &&
-              dayKey(task.assignedDate).isBefore(target),
+              dayKey(task.assignedDate).isBefore(target) &&
+              !alreadyCarriedIds.contains(task.id),
         )
         .toList();
   }
@@ -127,13 +138,16 @@ class LocalStorageService {
     final today = dayKey(date);
     final carriedIds = <String>[];
     for (final task in keptCarryOvers) {
-      final carried = task.copyWith(
+      final carried = TaskModel(
+        id: _uuid.v4(),
+        title: task.title,
+        createdAt: DateTime.now(),
         status: 'pending',
-        assignedDate: today,
         carryCount: task.carryCount + 1,
+        assignedDate: today,
         originalDate: task.originalDate ?? task.assignedDate,
-        clearCompletedAt: true,
-        clearReviewedAt: true,
+        previousTaskId: task.id,
+        addedLater: false,
       );
       await saveTask(carried);
       carriedIds.add(carried.id);

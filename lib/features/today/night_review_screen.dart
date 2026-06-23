@@ -100,7 +100,7 @@ class _NightReviewScreenState extends State<NightReviewScreen> {
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                                 const SizedBox(height: 12),
-                                Text('Today’s score: $done/${active.length}'),
+                                Text("Today's score: $done/${active.length}"),
                                 Text('Completion: ${(rate * 100).round()}%'),
                                 Text('Carried to tomorrow: $failed'),
                                 const SizedBox(height: 16),
