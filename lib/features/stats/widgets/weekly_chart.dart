@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/date_utils.dart';
 import '../../../data/models/daily_proof_model.dart';
 
 class WeeklyChart extends StatelessWidget {
-  const WeeklyChart({super.key, required this.proofs});
+  const WeeklyChart({super.key, required this.proofs, required this.endDate});
 
   final List<DailyProofModel> proofs;
+  final DateTime endDate;
 
   @override
   Widget build(BuildContext context) {
-    final days = proofs.take(7).toList().reversed.toList();
+    final proofsByDay = {for (final proof in proofs) dayId(proof.date): proof};
+    final end = dayKey(endDate);
+    final days = List.generate(
+      7,
+      (index) => end.subtract(Duration(days: 6 - index)),
+    );
     return SizedBox(
-      height: 130,
+      height: 144,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(7, (index) {
-          final proof = index < days.length ? days[index] : null;
+          final date = days[index];
+          final proof = proofsByDay[dayId(date)];
           final total = proof == null
               ? 0
               : proof.doneCount + proof.failedCount + proof.removedCount;
@@ -49,7 +57,10 @@ class WeeklyChart extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(proof == null ? '-' : '${(rate * 100).round()}%'),
+                  Text(
+                    shortDay(date).substring(0, 1),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
                 ],
               ),
             ),

@@ -38,7 +38,7 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             children: [
               Text(
-                'Good morning, Hasnain',
+                _greeting(DateTime.now()),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 8),
@@ -146,5 +146,11 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _greeting(DateTime now) {
+    if (now.hour < 12) return 'Good morning';
+    if (now.hour < 18) return 'Good afternoon';
+    return 'Good evening';
   }
 }

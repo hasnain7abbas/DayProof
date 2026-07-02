@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/glass_card.dart';
+import 'stats_metrics.dart';
 import 'widgets/weekly_chart.dart';
 
 class StatsScreen extends StatelessWidget {
@@ -12,26 +13,11 @@ class StatsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reviewed = controller.proofs
-        .where((proof) => proof.nightReviewed)
-        .toList();
-    final totalDone = reviewed.fold<int>(
-      0,
-      (sum, proof) => sum + proof.doneCount,
+    final metrics = StatsMetrics.calculate(
+      proofs: controller.proofs,
+      tasks: controller.allTasks,
+      activeDate: controller.activeDate,
     );
-    final totalFailed = reviewed.fold<int>(
-      0,
-      (sum, proof) => sum + proof.failedCount,
-    );
-    final totalRemoved = reviewed.fold<int>(
-      0,
-      (sum, proof) => sum + proof.removedCount,
-    );
-    final total = totalDone + totalFailed + totalRemoved;
-    final completion = total == 0 ? 0 : (totalDone / total * 100).round();
-    final streak = _reviewStreak(reviewed);
-    final mostCarried = controller.allTasks.toList()
-      ..sort((a, b) => b.carryCount.compareTo(a.carryCount));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Stats')),
@@ -51,10 +37,22 @@ class StatsScreen extends StatelessWidget {
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
             children: [
-              _StatCard(label: 'This week', value: '$completion%'),
-              _StatCard(label: 'Current streak', value: '$streak days'),
-              _StatCard(label: 'Tasks completed', value: '$totalDone'),
-              _StatCard(label: 'Tasks carried', value: '$totalFailed'),
+              _StatCard(
+                label: 'This week',
+                value: '${metrics.weeklyCompletion}%',
+              ),
+              _StatCard(
+                label: 'Current streak',
+                value: '${metrics.streak} days',
+              ),
+              _StatCard(
+                label: 'Tasks completed',
+                value: '${metrics.totalDone}',
+              ),
+              _StatCard(
+                label: 'Tasks carried',
+                value: '${metrics.totalFailed}',
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -67,7 +65,10 @@ class StatsScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
-                WeeklyChart(proofs: reviewed),
+                WeeklyChart(
+                  proofs: metrics.reviewedProofs,
+                  endDate: controller.activeDate,
+                ),
               ],
             ),
           ),
@@ -78,37 +79,16 @@ class StatsScreen extends StatelessWidget {
               children: [
                 Text('Signals', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 10),
-                Text('Total failed tasks: $totalFailed'),
-                Text('Total removed tasks: $totalRemoved'),
-                Text('Best day: ${_bestDay(reviewed)}'),
-                Text(
-                  'Most carried task: ${mostCarried.isEmpty ? 'None yet' : mostCarried.first.title}',
-                ),
+                Text('Total failed tasks: ${metrics.totalFailed}'),
+                Text('Total removed tasks: ${metrics.totalRemoved}'),
+                Text('Best day: ${metrics.bestDay}'),
+                Text('Most carried task: ${metrics.mostCarriedTask}'),
               ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  int _reviewStreak(List proofs) {
-    var streak = 0;
-    for (final proof in proofs) {
-      if (proof.nightReviewed) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    return streak;
-  }
-
-  String _bestDay(List proofs) {
-    if (proofs.isEmpty) return 'No proof yet';
-    proofs.sort((a, b) => b.doneCount.compareTo(a.doneCount));
-    final best = proofs.first;
-    return '${best.doneCount}/${best.doneCount + best.failedCount + best.removedCount}';
   }
 }
 
