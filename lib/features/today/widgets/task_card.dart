@@ -41,6 +41,12 @@ class TaskCard extends StatelessWidget {
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit_rounded),
                 ),
+              if (onEdit != null && onRemove != null)
+                IconButton(
+                  tooltip: 'Remove',
+                  onPressed: onRemove,
+                  icon: const Icon(Icons.delete_outline_rounded),
+                ),
             ],
           ),
           if (task.addedLater || task.carryCount > 0) ...[
@@ -52,7 +58,7 @@ class TaskCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
-          if (onDone != null || onFailed != null || onRemove != null) ...[
+          if (onDone != null || onFailed != null) ...[
             const SizedBox(height: 14),
             Wrap(
               spacing: 8,
