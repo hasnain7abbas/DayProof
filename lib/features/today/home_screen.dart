@@ -12,9 +12,10 @@ import 'night_review_screen.dart';
 import 'widgets/proof_summary_card.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, required this.controller});
+  const HomeScreen({super.key, required this.controller, this.now});
 
   final DayProofController controller;
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,7 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             children: [
               Text(
-                _greeting(DateTime.now()),
+                _greeting(now ?? DateTime.now()),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 8),

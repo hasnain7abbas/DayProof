@@ -2,118 +2,90 @@
 
 **Prove your day before it disappears.**
 
-DayProof is a small Android app for the two moments where a day usually goes honest or vague: the morning plan and the night review.
+[![CI](https://github.com/hasnain7abbas/DayProof/actions/workflows/ci.yml/badge.svg)](https://github.com/hasnain7abbas/DayProof/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/hasnain7abbas/DayProof?label=release)](https://github.com/hasnain7abbas/DayProof/releases/latest)
+[![Android](https://img.shields.io/badge/platform-Android-34D399)](https://github.com/hasnain7abbas/DayProof/releases/latest)
 
-In the morning, you write down the few things that would actually make the day count. At night, you come back and mark what happened. Done stays done. Not done carries into tomorrow. Anything that no longer matters can be removed without pretending it was completed.
+DayProof is a small Android app for two honest moments: deciding what matters in the morning, then returning at night to record what actually happened. It is intentionally narrower than a normal task manager. The list stays short, unfinished work stays visible, and every day leaves a local record.
 
-The point is not to manage every little task. It is to keep a quiet record of whether the important things survived the day.
+**[Download the latest Android APK](https://github.com/hasnain7abbas/DayProof/releases/latest)**
 
-## Screenshots
+Choose the `android-arm64` APK for nearly every current Android phone. The `android-armv7` build is there for older 32-bit devices. Published APKs are release-signed, versioned, and accompanied by SHA-256 checksums.
 
-| Today | Plan | Review |
-| --- | --- | --- |
-| ![Today screen](docs/images/dayproof-today.png) | ![Morning planning screen](docs/images/dayproof-plan.png) | ![Night review screen](docs/images/dayproof-review.png) |
+## The App
 
-| Stats | Settings |
-| --- | --- |
-| ![Stats screen](docs/images/dayproof-stats.png) | ![Settings screen](docs/images/dayproof-settings.png) |
+<p align="center">
+  <img src="docs/images/dayproof-today.png" width="31%" alt="DayProof today screen" />
+  <img src="docs/images/dayproof-plan.png" width="31%" alt="DayProof morning planning screen" />
+  <img src="docs/images/dayproof-review.png" width="31%" alt="DayProof night review screen" />
+</p>
 
-## Why It Exists
+<p align="center">
+  <img src="docs/images/dayproof-stats.png" width="31%" alt="DayProof stats screen" />
+  <img src="docs/images/dayproof-settings.png" width="31%" alt="DayProof settings screen" />
+</p>
 
-Most to-do apps make it easy to keep adding things. DayProof tries to do the opposite. It asks for a short list, locks the day, and then brings the same list back at night.
+Morning planning asks for only the tasks that would make the day count. Once the plan is locked, DayProof keeps it stable while still allowing clearly marked late additions.
 
-If something keeps coming back for three days, the app points it out. Maybe it needs to be broken smaller. Maybe it should be removed. Either way, it should not quietly haunt the list forever.
+At night, each task is recorded as Done, Not Done, or Removed. Not Done work can be carried into a fresh task on the next day without rewriting the previous day's history. If the same item survives for three days, the app asks whether it should be made smaller or dropped.
 
-## What Is Built
+## What It Keeps
 
-- First-run onboarding for morning and night reminder times.
-- Morning planning with editable tasks before the day is locked.
-- Carry-over tasks from the previous night.
-- Emergency tasks after locking, marked as added later.
-- Night review with Done, Not Done, and Remove.
-- Automatic carry-over for tasks marked Not Done.
-- History for previous days.
-- Simple stats for completion, streaks, completed tasks, carried tasks, and most-carried task.
-- Settings for reminder times, notifications, strong reminder mode, max tasks, JSON export, reset onboarding, and clearing data.
-- Hidden developer test mode by tapping the app version seven times.
+- A short daily plan with a configurable limit of 3 to 7 tasks
+- Morning and night reminders, including an optional exact-alarm mode
+- Carry-over history that preserves the original day and each retry
+- Daily review records and completion stats
+- A seven-day rhythm, current review streak, and carry signals
+- JSON export for the data stored on the device
 
-## Privacy
+There is no account, backend, cloud sync, advertising, or analytics. Tasks, settings, and history are stored locally with Hive. The Plus Jakarta Sans font is bundled in the APK, so the interface does not need a runtime font download.
 
-DayProof is local-first. There is no account, backend, Firebase project, cloud sync, ads, or social layer. The data lives on the device through Hive local storage.
+## Build It
 
-## Tech
-
-- Flutter
-- Hive
-- flutter_local_notifications
-- timezone
-- permission_handler
-- google_fonts
-- flutter_animate
-- confetti
-
-## Run It
+DayProof currently targets Flutter `3.44.2` and Java `17`.
 
 ```powershell
-flutter pub get
-flutter run
-```
-
-## Build The APK
-
-```powershell
-flutter clean
 flutter pub get
 flutter analyze
 flutter test
-flutter build apk --release
+flutter run
 ```
 
-Release APK from Flutter:
+A debug APK can be built without signing configuration:
 
-```text
-build/app/outputs/flutter-apk/app-release.apk
+```powershell
+flutter build apk --debug --target-platform android-arm64
 ```
 
-Copied release artifact in this repo:
+Release builds require a private keystore. Copy `android/key.properties.example` to `android/key.properties`, replace the example values, then run:
 
-```text
-release/dayproof-release.apk
+```powershell
+flutter build apk --release --split-per-abi
 ```
 
-Debug APK artifact:
+`android/key.properties`, keystores, and generated APK folders are ignored by Git. The tag workflow in [release.yml](.github/workflows/release.yml) reads the signing material from GitHub Actions secrets and publishes the arm64 and armv7 APKs to GitHub Releases.
 
-```text
-release/dayproof-debug.apk
+## Checks And Screenshots
+
+Every push and pull request runs analysis, tests, and an Android arm64 packaging check through [ci.yml](.github/workflows/ci.yml).
+
+The README images are rendered from the real Flutter widgets rather than maintained as mockups. Regenerate them after a UI change with:
+
+```powershell
+flutter test tool/readme_screenshots_test.dart --update-goldens
 ```
 
-## Reminder Behavior
-
-DayProof uses normal Android notifications. It does not try to force-open itself in the background. The morning reminder opens planning when tapped, and the night reminder opens review when tapped.
-
-On Android 13 and newer, notification permission is requested. If the user says no, the app still works manually.
-
-Strong reminder mode can request exact alarm permission. The app explains it like this:
-
-> DayProof needs reminder permission so it can remind you exactly when you choose. Without it, reminders may arrive a little late depending on your phone settings.
-
-If that permission is unavailable or denied, DayProof falls back to normal scheduled reminders.
-
-## Project Shape
+## Project Layout
 
 ```text
 lib/
-  app.dart
-  main.dart
-  core/
-  data/
-  services/
-  features/
-  shared/
+  core/       theme and date helpers
+  data/       local models and Hive storage
+  features/   onboarding, today, history, stats, settings
+  services/   notifications, permissions, scheduling
+  shared/     reusable controls and cards
 ```
-
-The feature folders are split around the actual screens: onboarding, today, stats, history, and settings.
 
 ## License
 
-Private project for now.
+Copyright (c) 2026 Hasnain Abbas. All rights reserved.
